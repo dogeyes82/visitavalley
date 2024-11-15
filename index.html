@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정답 확인</title>
+    <style>
+        /* 기본 스타일 */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        /* 테이블 스타일 */
+        .quiz-table {
+            width: 400px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            display: none; /* 처음에는 보이지 않도록 설정 */
+            background-color: #fff;
+        }
+        .quiz-table img {
+            width: 100%;
+            height: auto;
+        }
+        /* 인풋 박스 스타일 */
+        .quiz-table input {
+            width: 90%;
+            padding: 12px;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            outline: none;
+            transition: all 0.3s ease;
+            background-color: #f9f9f9;
+        }
+        /* 인풋 박스 포커스 시 효과 */
+        .quiz-table input:focus {
+            border-color: #4CAF50;
+            background-color: #e8f5e9;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+        }
+        /* 버튼 스타일 */
+        .check-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 30px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .check-btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+        .check-btn:active {
+            transform: translateY(0);
+        }
+        /* 정답 메시지 스타일 */
+        .message {
+            font-size: 14px;
+            color: #333;
+            margin: 5px 0;
+        }
+        .message.correct {
+            color: green;
+        }
+        /* 완료 메시지 */
+        #completion-message {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-top: 20px;
+            display: none;
+        }
+        /* 질문 텍스트 스타일 */
+        .question-text {
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="quiz-container">
+        <!-- 8개의 테이블 생성 -->
+        <script>
+            const questions = [
+                "1번 질문: 최윤선을 입력하세요",
+                "2번 질문: 박경석을 입력하세요",
+                "3번 질문: 박시후를 입력하세요",
+                "4번 질문: 정답4를 입력하세요",
+                "5번 질문: 정답5를 입력하세요",
+                "6번 질문: 정답6를 입력하세요",
+                "7번 질문: 정답7을 입력하세요",
+                "8번 질문: 정답8을 입력하세요"
+            ];
+            const answers = ["최윤선", "박경석", "박시후", "정답4", "정답5", "정답6", "정답7", "정답8"];
+
+            // 8번 반복하여 테이블 생성
+            for (let i = 1; i <= 8; i++) {
+                document.write(`
+                    <div class="quiz-table" id="quiz${i}">
+                        <div class="question-text">${questions[i - 1]}</div>
+                        <div>
+                            <img src="${i === 1 ? 'https://cnqnq6x1162u.objectstorage.ap-seoul-1.oci.customer-oci.com/p/4d_DJXYmI0ejd8avuhAILIIpyZqnmHvpQPxB3i9g9MKd65-abwpaD-tq-jraNd1k/n/cnqnq6x1162u/b/machugi-image/o/0bd5935f-070b-4540-a5fe-97412751cd0f.webp' : i === 2 ? 'https://cnqnq6x1162u.objectstorage.ap-seoul-1.oci.customer-oci.com/p/4d_DJXYmI0ejd8avuhAILIIpyZqnmHvpQPxB3i9g9MKd65-abwpaD-tq-jraNd1k/n/cnqnq6x1162u/b/machugi-image/o/ed30486c-f9d8-4083-8c72-cb0fc6169f53.webp' : i === 3 ? 'https://cnqnq6x1162u.objectstorage.ap-seoul-1.oci.customer-oci.com/p/4d_DJXYmI0ejd8avuhAILIIpyZqnmHvpQPxB3i9g9MKd65-abwpaD-tq-jraNd1k/n/cnqnq6x1162u/b/machugi-image/o/f8e11886-2619-4ced-8bca-081fec60a8d6.webp' : 'https://via.placeholder.com/150'}" alt="이미지 ${i}">
+                        </div>
+                        <div>
+                            <input type="text" placeholder="정답 입력" id="input${i}" value="">
+                            <button class="check-btn" onclick="checkAnswer(${i})">정답</button>
+                            <div class="message" id="message${i}"></div>
+                        </div>
+                    </div>
+                `);
+            }
+        </script>
+    </div>
+
+    <div id="completion-message">완료되었습니다!</div>
+
+    <script>
+        let currentQuiz = 1;
+
+        // 첫 번째 문제 표시
+        document.getElementById(`quiz${currentQuiz}`).style.display = "block";
+
+        function checkAnswer(index) {
+            const input = document.getElementById(`input${index}`);
+            const message = document.getElementById(`message${index}`);
+
+            // 정답 확인
+            if (input.value.trim() === answers[index - 1]) {
+                message.textContent = "정답입니다!";
+                message.className = "message correct";
+
+                // 현재 문제 숨기고 다음 문제 표시
+                document.getElementById(`quiz${index}`).style.display = "none";
+                currentQuiz++;
+
+                // 다음 문제가 있으면 표시, 없으면 완료 메시지 표시
+                if (currentQuiz <= 8) {
+                    document.getElementById(`quiz${currentQuiz}`).style.display = "block";
+                } else {
+                    document.getElementById("completion-message").style.display = "block";
+                }
+            } else {
+                message.textContent = "오답입니다. 다시 시도하세요.";
+                message.className = "message";
+            }
+        }
+    </script>
+</body>
+</html>
